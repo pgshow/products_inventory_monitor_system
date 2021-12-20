@@ -82,8 +82,8 @@ if __name__ == '__main__':
     lock = threading.Lock()
 
     # 爬 Cjdropshipping 全站商品
-    # t = CjdScraper(lock)
-    # t.start()
+    t = CjdScraper(lock)
+    t.start()
 
     # 获取各站插件
     my_plugins = PluginCollection('target')

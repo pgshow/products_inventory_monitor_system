@@ -16,7 +16,7 @@ class TopMaker:
 
         for p in products:
             # 计算每个产品库存变化
-            sql = f"select diff from changes where product_id={p[0]} AND check_time > '{start} 00:00:00' AND check_time < '{end} 24:00:00'"
+            sql = f"select diff2 from changes where product_id={p[0]} AND check_time > '{start} 00:00:00' AND check_time < '{end} 24:00:00'"
             changes = config.DB_OBJ.select_many(sql)
 
             if len(changes) <= 0:

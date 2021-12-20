@@ -241,7 +241,7 @@
                         <td><button class="btn btn-default btn-w-md" type="button">Url</button></td>
                         <td><a href="{{ detail.url }}" target="_blank">{{ detail.url }}</a></td>
                         <td><button class="btn btn-default btn-w-md" type="button">当前库存</button></td>
-                        <td>{{inventory[inventory|length-1].amount}}</td>
+                        <td>{{inventory[inventory|length-1].amount2}}</td>
                       </tr>
                     </tbody>
                   </table>
@@ -284,6 +284,7 @@
 <script type="text/javascript" src="js/bootstrap.min.js"></script>
 <script type="text/javascript" src="js/perfect-scrollbar.min.js"></script>
 <script type="text/javascript" src="js/Chart.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@0.7.0"></script>
 <script type="text/javascript" src="js/main.min.js"></script>
 <script type="text/javascript">
 new Chart($("#chart-vbar-inventory"), {
@@ -296,7 +297,7 @@ new Chart($("#chart-vbar-inventory"), {
             borderColor: "rgba(0,0,0,0)",
             hoverBackgroundColor: "rgba(51,202,185,0.7)",
             hoverBorderColor: "rgba(0,0,0,0)",
-            data: [{{ inventory|join(',', attribute='amount') }}]
+            data: [{{ inventory|join(',', attribute='amount2') }}]
         }]
     },
     options: {
@@ -320,7 +321,7 @@ new Chart($("#chart-vbar-changes"), {
             borderColor: "rgba(0,0,0,0)",
             hoverBackgroundColor: "rgba(51,202,185,0.7)",
             hoverBorderColor: "rgba(0,0,0,0)",
-            data: [{{ changes|join(',', attribute='diff') }}]
+            data: [{{ changes|join(',', attribute='diff2') }}]
         }]
     },
     options: {

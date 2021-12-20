@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, redirect, url_for, Response, make_response, session, Request
 from flask_sqlalchemy import SQLAlchemy
 from make_top import TopMaker
 from datetime import datetime
@@ -28,7 +28,7 @@ class Inventory(db.Model):
 
     # 定义字段对象
     id = db.Column('id', db.Integer, primary_key=True)
-    amount = db.Column(db.Integer)
+    amount2 = db.Column(db.Integer)
     scan_time = db.Column(db.DateTime)
 
     product_id = db.Column(db.Integer, db.ForeignKey("products.product_id"))
@@ -40,7 +40,7 @@ class Changes(db.Model):
 
     # 定义字段对象
     id = db.Column('id', db.Integer, primary_key=True)
-    diff = db.Column(db.Integer)
+    diff2 = db.Column(db.Integer)
     check_time = db.Column(db.DateTime)
 
     product_id = db.Column(db.Integer, db.ForeignKey("products.product_id"))
@@ -60,9 +60,24 @@ class Top(db.Model):
     info = db.relationship("Products", uselist=False, backref="own")
 
 
+def is_admin():
+    if request.cookies.get('username') == 'user_8u7u_o90':
+        return True
+
+
+@app.route('/passwd_8u7u_o90')
+def passwd():
+    resp = make_response(redirect('/'))
+    resp.set_cookie('username', 'user_8u7u_o90')
+    return resp
+
+
 @app.route('/')
 def index():
     try:
+        if not is_admin():
+            return 'Permission denied'
+
         html = render_template('index.html', products_num=UI.get_items_num(), inventory_crawl_times=UI.get_inventory_crawl_times(), system_time=UI.get_time_str())
         return html
     except Exception as e:
@@ -71,6 +86,9 @@ def index():
 
 @app.route('/product_list')
 def p_list():
+    if not is_admin():
+        return 'Permission denied'
+
     search_field = request.args.get('search_field')
     keyword = request.args.get('keyword')
 
@@ -95,6 +113,9 @@ def p_list():
 def p_list_filter():
     """搜索器页面"""
     try:
+        if not is_admin():
+            return 'Permission denied'
+
         html = render_template('product_filter.html')
         return html
     except Exception as e:
@@ -103,6 +124,9 @@ def p_list_filter():
 
 @app.route('/product_top')
 def p_list_top():
+    if not is_admin():
+        return 'Permission denied'
+
     order = request.args.get('order')
     start = request.args.get('start')
     end = request.args.get('end')
@@ -132,6 +156,9 @@ def p_list_top():
 
 @app.route('/product_detail')
 def p_detail():
+    if not is_admin():
+        return 'Permission denied'
+
     product_id = request.args.get('product_id')
 
     # 商品详情
@@ -165,5 +192,5 @@ def _trim_time(s):
 
 
 if __name__ == '__main__':
-    app.run(debug=False, host="0.0.0.0", use_reloader=False)
+    app.run(debug=False, host="0.0.0.0", port=5005, use_reloader=False)
     pass
