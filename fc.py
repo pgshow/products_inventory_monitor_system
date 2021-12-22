@@ -10,7 +10,7 @@ def choose_plugin(plugins, website):
 
 def get_unchecked_today(lock):
     """获取今日需要检查的商品"""
-    sql = "SELECT * FROM PRODUCTS"
+    sql = "SELECT * FROM PRODUCTS WHERE active_time > date('now','-15 days')"
     all_products = config.DB_OBJ.select_many(sql=sql, lock=lock)
 
     unchecked_products = []

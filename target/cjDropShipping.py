@@ -4,7 +4,6 @@ import requests
 import config
 import pluginBase
 
-from goto import with_goto
 from loguru import logger
 from retry import retry
 
@@ -20,7 +19,6 @@ class SubPlugin(pluginBase.Plugin):
 
         self.crawl(product, lock)
 
-    @with_goto
     def crawl(self, product, lock):
         url = 'https://cjdropshipping.com/storehousecj/areaInventory/getAreaInventoryInfo'
 
@@ -28,31 +26,32 @@ class SubPlugin(pluginBase.Plugin):
             'pid': product[1]
         }
 
-        label.begin
-        try:
-            r = self.post(url, post_data)
+        for i in range(0, 20):
+            try:
+                r = self.post(url, post_data)
 
-            if r.status_code != 200:
-                raise Exception(f'Status {r.status_code}')
+                if r.status_code != 200:
+                    raise Exception(f'Status {r.status_code}')
 
-            json_data = r.json()
+                json_data = r.json()
 
-            logger.debug(f'{product[1]} - ok')
+                logger.debug(f'{product[1]} - ok')
 
-            real_num, num = self.extract_inventory(json_data)  # cjDropShipping 有 realNum 和 num 两个库存数值
+                real_num, num = self.extract_inventory(json_data)  # cjDropShipping 有 realNum 和 num 两个库存数值
 
-            if self.save_inventory(real_num, num, product[0], lock):
-                self.calculate_change(product_id=product[0], lock=lock)
+                if self.save_inventory(real_num, num, product[0], lock):
+                    self.calculate_change(product_id=product[0], lock=lock)
 
-            return
+                return
 
-        except Exception as e:
-            if 'json invalid' in str(e):
-                logger.warning(f'{product[1]} json invalid - retry')
-                time.sleep(5)
-                goto.begin
+            except Exception as e:
+                if 'json invalid' in str(e) or 'cannot unpack' in str(e):
+                    logger.warning(f'{product[1]} json invalid - retry')
+                    time.sleep(5)
+                    continue
 
-            logger.error(f'{product[1]} err: {e}')
+                logger.error(f'{product[1]} err: {e}')
+                return
 
     def calculate_change(self, product_id, lock):
         """计算两天的变化"""

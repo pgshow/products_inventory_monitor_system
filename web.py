@@ -28,6 +28,7 @@ class Inventory(db.Model):
 
     # 定义字段对象
     id = db.Column('id', db.Integer, primary_key=True)
+    amount1 = db.Column(db.Integer)
     amount2 = db.Column(db.Integer)
     scan_time = db.Column(db.DateTime)
 
@@ -40,6 +41,7 @@ class Changes(db.Model):
 
     # 定义字段对象
     id = db.Column('id', db.Integer, primary_key=True)
+    diff1 = db.Column(db.Integer)
     diff2 = db.Column(db.Integer)
     check_time = db.Column(db.DateTime)
 
@@ -58,6 +60,20 @@ class Top(db.Model):
     product_id = db.Column(db.Integer, db.ForeignKey("products.product_id"))
 
     info = db.relationship("Products", uselist=False, backref="own")
+
+
+class Top2(db.Model):
+    # 定义表名
+    __tablename__ = 'top2'
+
+    # 定义字段对象
+    id = db.Column('id', db.Integer, primary_key=True)
+    period_change = db.Column(db.Integer)
+    start2end_date = db.Column(db.String)
+
+    product_id = db.Column(db.Integer, db.ForeignKey("products.product_id"))
+
+    info = db.relationship("Products")
 
 
 def is_admin():
@@ -122,6 +138,19 @@ def p_list_filter():
         return str(e)
 
 
+@app.route('/product_filter2')
+def p_list_filter2():
+    """搜索器页面"""
+    try:
+        if not is_admin():
+            return 'Permission denied'
+
+        html = render_template('product_filter2.html')
+        return html
+    except Exception as e:
+        return str(e)
+
+
 @app.route('/product_top')
 def p_list_top():
     if not is_admin():
@@ -136,7 +165,7 @@ def p_list_top():
         top = TopMaker()
         status = top.clear()
         if not status:
-            return 'Clear TOP table failed'
+            return 'Clear TOP2 table failed'
 
         top.make_data(start, end)  # 将某段时间内的库存变化总量存入 top 表
 
@@ -149,6 +178,38 @@ def p_list_top():
 
     try:
         html = render_template('product_top.html', pagination=pagination, order=order)
+        return html
+    except Exception as e:
+        return str(e)
+
+
+@app.route('/product_top2')
+def p_list_top2():
+    if not is_admin():
+        return 'Permission denied'
+
+    order = request.args.get('order')
+    start = request.args.get('start')
+    end = request.args.get('end')
+
+    if all([start, end]):
+        # 清空 top 表
+        top = TopMaker()
+        status = top.clear2()
+        if not status:
+            return 'Clear TOP2 table failed'
+
+        top.make_data2(start, end)  # 将某段时间内的库存变化总量存入 top 表
+
+    if order == 'asc':
+        pagination = Top2.query.order_by(Top2.period_change.asc()).paginate(per_page=20)
+    else:
+        pagination = Top2.query.order_by(Top2.period_change.desc()).paginate(per_page=20)
+
+    # pagination = Top.query.join(Top, Top.product_id == Products.product_id).paginate(per_page=20)
+
+    try:
+        html = render_template('product_top2.html', pagination=pagination, order=order)
         return html
     except Exception as e:
         return str(e)
@@ -167,10 +228,10 @@ def p_detail():
         return 'This product is not exist'
 
     # 商品每日库存
-    inventory = Inventory.query.filter_by(product_id=product_id).all()
+    inventory = Inventory.query.filter_by(product_id=product_id).limit(30).all()
 
     # 库存变化
-    changes = Changes.query.filter_by(product_id=product_id).all()
+    changes = Changes.query.filter_by(product_id=product_id).limit(30).all()
 
     try:
         html = render_template('product_detail.html', detail=detail, inventory=inventory, changes=changes)

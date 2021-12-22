@@ -3,7 +3,7 @@ import time
 import requests
 import brotli
 import config
-
+from datetime import datetime
 from retry import retry
 from loguru import logger
 from bs4 import BeautifulSoup, element, NavigableString
@@ -142,9 +142,18 @@ class CjdScraper(threading.Thread):
         for p in products:
             sql = f"SELECT product_id FROM PRODUCTS WHERE product_code = '{p['product_code']}'"
             if not config.DB_OBJ.select_exist(sql=sql, lock=self.lock):
-                sql = '''INSERT INTO PRODUCTS(product_code, product_name, website, url) VALUES(?, ?, ?, ?)'''
-                param = (p['product_code'], p['product_name'], 'cjDropShipping', p['url'], )
+                sql = '''INSERT INTO PRODUCTS(product_code, product_name, website, url, active_time) VALUES(?, ?, ?, ?, ?)'''
+                param = (p['product_code'], p['product_name'], 'cjDropShipping', p['url'], datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
                 config.DB_OBJ.add(lock=self.lock, sql=sql, param=param)
                 new_num += 1
 
+            else:
+                self.active_time(p['product_code'])  # 更新活跃时间
+
         logger.info(f'Add {new_num} new products')
+
+    def active_time(self, product_code):
+        """产品最后一次在栏目列表出现的时间"""
+        active_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        sql = f"UPDATE PRODUCTS SET active_time = '{active_time}' where product_code = '{product_code}'"
+        config.DB_OBJ.update(sql=sql, lock=self.lock)

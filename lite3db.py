@@ -24,6 +24,23 @@ class DB:
         finally:
             lock.release()
 
+    def update(self, sql, lock=None):
+        """保存搜索日期的课程表"""
+        try:
+            if lock:
+                lock.acquire()
+
+            self._cursor.execute(sql)
+            self._conn.commit()
+            return True
+        except Exception as e:
+            logger.error(f'DB err: {e}')
+            return
+
+        finally:
+            if lock:
+                lock.release()
+
     def select_exist(self, sql, lock=None):
         try:
             if lock:
