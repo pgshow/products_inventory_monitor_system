@@ -102,6 +102,6 @@ if __name__ == '__main__':
 
         time.sleep(5)
 
-        with ThreadPoolExecutor(max_workers=2) as t:
+        with ThreadPoolExecutor(max_workers=3) as t:
             all_task = [t.submit(scraping, p, lock) for p in need_check]
             wait(all_task, return_when=ALL_COMPLETED)  # 等待所有任务完成在返回

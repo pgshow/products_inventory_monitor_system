@@ -117,11 +117,13 @@ class CjdScraper(threading.Thread):
             'sec-gpc': '1',
             'upgrade-insecure-requests': '1',
             'user-agent': 'Mozilla/5.0(WindowsNT10.0;Win64;x64)AppleWebKit/537.36(KHTML,likeGecko)Chrome/92.0.4515.131Safari/537.36',
+            'Connection': 'close',
         }
 
         logger.debug(f"Fetching: {url}")
 
         r = requests.get(url, headers=header, timeout=30, allow_redirects=False)
+        r.close()
 
         if r.status_code != 200:
             logger.error(F"status {r.status_code}")

@@ -242,6 +242,9 @@ def p_detail():
 
 @app.template_filter('short_date')
 def _trim_time(s):
+    if not s:
+        return
+
     time_str_list = s.split('","')
 
     dates = []

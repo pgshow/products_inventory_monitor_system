@@ -12,7 +12,6 @@ class SubPlugin(pluginBase.Plugin):
     def __init__(self):
         super().__init__()
         self.id = 'cjDropShipping'
-        self.r = requests.session()
 
     def run_job(self, product, lock):
         logger.info(f"Crawl: {product[0]} - {product[4]}")
@@ -111,10 +110,12 @@ class SubPlugin(pluginBase.Plugin):
             'sec-fetch-mode': 'cors',
             'sec-fetch-site': 'same-origin',
             'user-agent': 'Mozilla/5.0(WindowsNT10.0;Win64;x64)AppleWebKit/537.36(KHTML,likeGecko)Chrome/95.0.4638.69Safari/537.36',
+            'Connection': 'close',
         }
 
         logger.debug(f"Fetching: {url}")
 
         r = requests.post(url, headers=header, json=post_data, timeout=30, allow_redirects=False)
+        r.close()
 
         return r
