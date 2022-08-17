@@ -24,9 +24,8 @@ class Plugin:
         headers['user-agent'] = self.useragent
         return session.get(url=url, headers=headers, timeout=timeout, allow_redirects=False)
 
-
     @retry(tries=5, delay=10, backoff=2, max_delay=120)
-    def get(self, url, timeout, headers=None):
+    def fetch(self, url, timeout, headers=None):
         """
         通用 get 和 post方法
         """

@@ -1,4 +1,5 @@
 import config
+from loguru import logger
 
 
 def choose_plugin(plugins, website):
@@ -16,10 +17,11 @@ def get_unchecked_today(lock):
     unchecked_products = []
     for p in all_products:
         # 今天是否已经检查库存
+        logger.debug(f'Filter unchecked product id: {p[0]}')
+
         sql = f"select id from inventory_daily where product_id={p[0]} AND scan_time > date('now','localtime')"
         if config.DB_OBJ.select_exist(sql, lock=lock):
             continue
-
         unchecked_products.append(p)
 
     return unchecked_products
